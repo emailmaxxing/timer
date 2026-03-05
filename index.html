@@ -3,100 +3,155 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Focus Timer</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    background:#0f0d1a;font-family:'Inter',sans-serif;color:#f0eaff;
-    min-height:100vh;display:flex;align-items:center;justify-content:center;
-    letter-spacing:-0.8px;overflow:hidden;
+
+  /* ── TOKENS ── */
+  :root{
+    --bg:        #0f0d1a;
+    --card:      #141122;
+    --ring-bg:   #1e1b2e;
+    --border:    #2e2550;
+    --badge:     #7c3aed;
+    --title:     #a78bfa;
+    --time:      #f0eaff;
+    --sep:       #2e2550;
+    --lbl:       #4b3f8a;
+    --status:    #5b4fa0;
+    --btn-sec-bg:#1e1b2e;
+    --btn-sec-bd:#2e2550;
+    --btn-sec-tx:#c4b5fd;
+    --grad-a:    #a78bfa;
+    --grad-b:    #6d28d9;
+    --grad-pri-a:#6d28d9;
+    --grad-pri-b:#4c1d95;
+    --pri-bd:    #7c3aed;
+    --tog-bg:    #1e1b2e;
+    --tog-bd:    #2e2550;
+    --tog-ico:   #a78bfa;
+  }
+  [data-theme="light"]{
+    --bg:        #f0ecff;
+    --card:      #ffffff;
+    --ring-bg:   #e0d9f7;
+    --border:    #c4b5fd;
+    --badge:     #6d28d9;
+    --title:     #5b21b6;
+    --time:      #1e1b2e;
+    --sep:       #c4b5fd;
+    --lbl:       #7c6fcd;
+    --status:    #7c6fcd;
+    --btn-sec-bg:#ede9fe;
+    --btn-sec-bd:#c4b5fd;
+    --btn-sec-tx:#5b21b6;
+    --grad-a:    #7c3aed;
+    --grad-b:    #4c1d95;
+    --grad-pri-a:#7c3aed;
+    --grad-pri-b:#6d28d9;
+    --pri-bd:    #6d28d9;
+    --tog-bg:    #ede9fe;
+    --tog-bd:    #c4b5fd;
+    --tog-ico:   #5b21b6;
   }
 
+  body{
+    background:var(--bg);font-family:'Inter',sans-serif;color:var(--time);
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    letter-spacing:-.8px;overflow:hidden;transition:background .3s;
+  }
+
+  /* ── THEME TOGGLE ── */
+  .toggle-btn{
+    position:fixed;top:1.25rem;right:1.25rem;
+    background:var(--tog-bg);border:1px solid var(--tog-bd);
+    border-radius:50%;width:42px;height:42px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:18px;transition:filter .15s,transform .1s;
+    color:var(--tog-ico);
+  }
+  .toggle-btn:hover{filter:brightness(1.2)}
+  .toggle-btn:active{transform:scale(.92)}
+
+  /* ── SCENE ── */
   .scene{position:relative;width:520px;height:520px}
 
-  /* SVG ring */
   svg.ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
-  .ring-bg{fill:none;stroke:#1e1b2e;stroke-width:10}
-  .ring-fill{fill:none;stroke:url(#ringGrad);stroke-width:10;stroke-linecap:round;
+  .ring-bg{fill:none;stroke:var(--ring-bg);stroke-width:10}
+  .ring-fill{
+    fill:none;stroke:url(#ringGrad);stroke-width:10;stroke-linecap:round;
     transition:stroke-dashoffset .4s linear;
-    stroke-dasharray:1492;stroke-dashoffset:0}
+    stroke-dasharray:1489;stroke-dashoffset:0;
+  }
 
-  /* Circle card */
   .circle{
-    position:absolute;inset:28px;
-    border-radius:50%;
-    background:#141122;
+    position:absolute;inset:28px;border-radius:50%;
+    background:var(--card);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:0;
+    transition:background .3s;
   }
 
-  /* Badge */
-  .badge{
-    font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-    color:#7c3aed;margin-bottom:.5rem;
-  }
+  .badge{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--badge);margin-bottom:.5rem}
 
-  /* Time display */
   .time-row{display:flex;align-items:center;gap:2px;margin-bottom:.25rem}
   .time-box{display:flex;flex-direction:column;align-items:center}
   .time-box input{
     background:none;border:none;outline:none;
     font-family:'Inter',sans-serif;font-size:72px;font-weight:900;
-    letter-spacing:-5px;color:#f0eaff;line-height:1;
+    letter-spacing:-5px;color:var(--time);line-height:1;
     width:120px;text-align:center;
-    -moz-appearance:textfield;cursor:text;
+    -moz-appearance:textfield;cursor:text;transition:color .3s;
   }
   .time-box input::-webkit-inner-spin-button,
   .time-box input::-webkit-outer-spin-button{-webkit-appearance:none}
-  .time-box input::placeholder{color:#2a2040}
-  .time-box input:disabled{color:#f0eaff;cursor:default}
-  .time-box .lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4b3f8a;margin-top:.1rem}
-  .sep{font-size:64px;font-weight:900;color:#2e2550;letter-spacing:-5px;padding-bottom:10px;margin:0 -4px}
+  .time-box input::placeholder{color:var(--border)}
+  .time-box input:disabled{color:var(--time);cursor:default}
+  .time-box .lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lbl);margin-top:.1rem}
+  .sep{font-size:64px;font-weight:900;color:var(--sep);letter-spacing:-5px;padding-bottom:10px;margin:0 -4px}
 
-  /* Status */
-  .status{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#5b4fa0;margin-bottom:1.1rem;min-height:14px}
+  .status{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--status);margin-bottom:1.1rem;min-height:14px}
 
-  /* Buttons */
   .controls{display:flex;gap:.7rem;align-items:center}
   button.ctrl{
-    border:none;outline:none;cursor:pointer;
-    border-radius:50px;font-family:'Inter',sans-serif;
-    font-weight:700;letter-spacing:-0.5px;
+    border:none;outline:none;cursor:pointer;border-radius:50px;
+    font-family:'Inter',sans-serif;font-weight:700;letter-spacing:-.5px;
     transition:filter .15s,transform .1s;
   }
   button.ctrl:active{transform:scale(.94)}
   .btn-secondary{
-    background:#1e1b2e;border:1px solid #2e2550;color:#c4b5fd;
-    font-size:12px;padding:.55rem 1rem;
+    background:var(--btn-sec-bg);border:1px solid var(--btn-sec-bd);
+    color:var(--btn-sec-tx);font-size:12px;padding:.55rem 1rem;
   }
-  .btn-secondary:hover{filter:brightness(1.35)}
+  .btn-secondary:hover{filter:brightness(1.1)}
   .btn-primary{
-    background:linear-gradient(135deg,#6d28d9,#4c1d95);
-    border:1px solid #7c3aed;color:#fff;
+    background:linear-gradient(135deg,var(--grad-pri-a),var(--grad-pri-b));
+    border:1px solid var(--pri-bd);color:#fff;
     font-size:15px;padding:.7rem 1.6rem;
   }
-  .btn-primary:hover{filter:brightness(1.15)}
+  .btn-primary:hover{filter:brightness(1.12)}
 
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-  .done-pulse input{animation:pulse .65s ease-in-out infinite;color:#a78bfa !important}
+  .done-pulse input{animation:pulse .65s ease-in-out infinite;color:var(--title) !important}
 </style>
 </head>
 <body>
-<div class="scene">
 
-  <!-- SVG ring -->
+<!-- Theme toggle -->
+<button class="toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
+<div class="scene">
   <svg class="ring" viewBox="0 0 520 520">
     <defs>
       <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#a78bfa"/>
-        <stop offset="100%" stop-color="#6d28d9"/>
+        <stop id="gStop1" offset="0%" stop-color="#a78bfa"/>
+        <stop id="gStop2" offset="100%" stop-color="#6d28d9"/>
       </linearGradient>
     </defs>
     <circle class="ring-bg" cx="260" cy="260" r="237"/>
     <circle class="ring-fill" id="ringFill" cx="260" cy="260" r="237"/>
   </svg>
 
-  <!-- Inner circle -->
   <div class="circle">
     <div class="badge">Focus Timer</div>
 
@@ -128,6 +183,30 @@
 </div>
 
 <script>
+  // ── Theme ──
+  const LIGHT_STOPS = ["#7c3aed","#4c1d95"];
+  const DARK_STOPS  = ["#a78bfa","#6d28d9"];
+  const toggleBtn   = document.getElementById("themeToggle");
+
+  let isDark = true;
+  const savedTheme = localStorage.getItem("timerTheme");
+  if(savedTheme === "light"){ isDark=false; applyTheme(); }
+
+  function applyTheme(){
+    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+    toggleBtn.textContent = isDark ? "🌙" : "☀️";
+    const [s1,s2] = isDark ? DARK_STOPS : LIGHT_STOPS;
+    document.getElementById("gStop1").setAttribute("stop-color", s1);
+    document.getElementById("gStop2").setAttribute("stop-color", s2);
+  }
+
+  window.toggleTheme = () => {
+    isDark = !isDark;
+    localStorage.setItem("timerTheme", isDark ? "dark" : "light");
+    applyTheme();
+  };
+
+  // ── Timer ──
   let total=0,remaining=0,running=false,interval=null,done=false;
   const pad=n=>String(n).padStart(2,"0");
   const inH=document.getElementById("inH");
@@ -135,47 +214,32 @@
   const inS=document.getElementById("inS");
   const startBtn=document.getElementById("startBtn");
   const ringFill=document.getElementById("ringFill");
-  const CIRC=2*Math.PI*237; // ~1489.4
+  const CIRC=2*Math.PI*237;
 
   window.clampInput=(el,max)=>{let v=parseInt(el.value);if(isNaN(v))return;if(v<0)el.value=0;if(v>max)el.value=max;};
   const setStatus=t=>document.getElementById("statusLbl").textContent=t;
-
-  const renderRing=()=>{
-    const pct=total>0?(remaining/total):1;
-    ringFill.style.strokeDashoffset=CIRC*(1-pct);
-  };
-
-  const setDisplayFromRemaining=()=>{
-    inH.value=pad(Math.floor(remaining/3600));
-    inM.value=pad(Math.floor((remaining%3600)/60));
-    inS.value=pad(remaining%60);
-  };
-
-  const lockInputs=lock=>{inH.disabled=lock;inM.disabled=lock;inS.disabled=lock;};
+  const renderRing=()=>{ ringFill.style.strokeDashoffset=total>0?CIRC*(1-(remaining/total)):0; };
+  const setDisplay=()=>{ inH.value=pad(Math.floor(remaining/3600)); inM.value=pad(Math.floor((remaining%3600)/60)); inS.value=pad(remaining%60); };
+  const lockInputs=l=>{inH.disabled=l;inM.disabled=l;inS.disabled=l;};
 
   window.toggleTimer=()=>{
     if(done){resetTimer();return;}
     if(!running){
-      const h=parseInt(inH.value)||0;
-      const m=parseInt(inM.value)||0;
-      const s=parseInt(inS.value)||0;
-      const secs=h*3600+m*60+s;
+      const secs=(parseInt(inH.value)||0)*3600+(parseInt(inM.value)||0)*60+(parseInt(inS.value)||0);
       if(secs<=0)return;
       if(remaining===0||remaining===total){total=remaining=secs;}
       lockInputs(true);running=true;
-      startBtn.textContent="⏸ Pause";
-      setStatus("focus");renderRing();
+      startBtn.textContent="⏸ Pause";setStatus("focus");renderRing();
       interval=setInterval(tick,1000);
     }else{
       clearInterval(interval);running=false;
-      startBtn.textContent="▶ Resume";
-      setStatus("paused");
+      startBtn.textContent="▶ Resume";setStatus("paused");
     }
   };
 
   const tick=()=>{
     if(remaining<=0){finish();return;}
-    remaining--;setDisplayFromRemaining();renderRing();
+    remaining--;setDisplay();renderRing();
     if(remaining===0)finish();
   };
 
@@ -187,12 +251,11 @@
     try{
       const ctx=new(window.AudioContext||window.webkitAudioContext)();
       [0,150,300].forEach(d=>{
-        const osc=ctx.createOscillator(),g=ctx.createGain();
-        osc.connect(g);g.connect(ctx.destination);
-        osc.frequency.value=880;osc.type="sine";
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.frequency.value=880;o.type="sine";
         g.gain.setValueAtTime(0.3,ctx.currentTime+d/1000);
         g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d/1000+0.4);
-        osc.start(ctx.currentTime+d/1000);osc.stop(ctx.currentTime+d/1000+0.4);
+        o.start(ctx.currentTime+d/1000);o.stop(ctx.currentTime+d/1000+0.4);
       });
     }catch(e){}
   };
@@ -206,9 +269,7 @@
   };
 
   window.addTime=secs=>{
-    if(done)return;
-    total+=secs;remaining+=secs;
-    setDisplayFromRemaining();renderRing();
+    if(done)return;total+=secs;remaining+=secs;setDisplay();renderRing();
   };
 
   document.addEventListener("keydown",e=>{
